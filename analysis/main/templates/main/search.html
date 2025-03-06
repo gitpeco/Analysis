@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>招聘数据爬虫网站</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .results table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .results th, .results td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .results th {
+            background-color: #f2f2f2;
+        }
+        .logout-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .logout-button a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .logout-button a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>招聘数据爬虫</h1>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="search_query">搜索关键词</label>
+                <input type="text" id="search_query" name="search_query" required>
+            </div>
+            <div class="form-group">
+                <button type="submit">搜索</button>
+            </div>
+        </form>
+        <div class="results">
+            <h2>结果</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>职位</th>
+                        <th>城市</th>
+                        <th>区域</th>
+                        <th>街道</th>
+                        <th>公司</th>
+                        <th>薪资</th>
+                        <th>经验</th>
+                        <th>学历</th>
+                        <th>领域</th>
+                        <th>融资</th>
+                        <th>规模</th>
+                        <th>技能要求</th>
+                        <th>基本福利</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.jobName }}</td>
+                        <td>{{ result.cityName }}</td>
+                        <td>{{ result.areaDistrict }}</td>
+                        <td>{{ result.businessDistrict }}</td>
+                        <td>{{ result.brandName }}</td>
+                        <td>{{ result.salaryDesc }}</td>
+                        <td>{{ result.jobExperience }}</td>
+                        <td>{{ result.jobDegree }}</td>
+                        <td>{{ result.brandIndustry }}</td>
+                        <td>{{ result.brandStageName }}</td>
+                        <td>{{ result.brandScaleName }}</td>
+                        <td>{{ result.skills }}</td>
+                        <td>{{ result.welfareList }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="logout-button">
+            <p><a href="/logout/">返回登录页</a></p>
+        </div>
+    </div>
+</body>
+</html>
