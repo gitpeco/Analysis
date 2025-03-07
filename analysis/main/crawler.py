@@ -1,4 +1,4 @@
-# crawler.py
+from io import StringIO
 import json
 import time
 from pprint import pprint
@@ -6,13 +6,19 @@ from DrissionPage import ChromiumOptions
 from DrissionPage._pages.chromium_page import ChromiumPage
 import csv
 from urllib.parse import quote
-
+from io import StringIO
+import json
+import time
+from pprint import pprint
+from urllib.parse import quote
+from DrissionPage import ChromiumOptions, ChromiumPage
 
 def run_crawler(query):
     # 创建文件对象
     f = open('data.csv', mode='w', encoding='utf-8', newline='')
     # 字典写入方法
-    csv_writer = csv.DictWriter(f, fieldnames=[
+    csv_buffer = StringIO()
+    csv_writer = csv.DictWriter(csv_buffer, fieldnames=[
         '职位',
         '城市',
         '区域',
@@ -38,20 +44,22 @@ def run_crawler(query):
     dp.listen.start('wapi/zpgeek/search/joblist.json')
     # 访问网站
 
-    url = f'https://www.zhipin.com/web/geek/job?query={query}&city=100010000'
+    url = f'https://www.zhipin.com/web/geek/job?query={query}&city=100010000&page=1'
     dp.get(url)
     # 等待数据包的加载
     resp = dp.listen.wait()
 
+    all_jobs = []  # 用于存储所有页的数据
 
     # 循环翻页
-    jobList = []  # 初始化 jobList 为空列表
     for page in range(1, 11):
         print(f'正在采集{page}页的数据内容')
+
         # 下滑页面到底部
         dp.scroll.to_bottom()
         # 获取响应数据
         json_data = resp.response.body
+
         """解析数据"""
         # 确保 json_data 是一个字典
         if isinstance(json_data, str):
@@ -79,12 +87,12 @@ def run_crawler(query):
                 }
                 # 写入数据
                 csv_writer.writerow(dit)
+                # 将当前岗位信息添加到 all_jobs 列表
 
-                pprint(dit)
 
-        # 元素定位
+        # 点击下一页
         time.sleep(2)
         dp.ele('css:.ui-icon-arrow-right').click()
+
     dp.close()
-    f.close()
-    return jobList
+    return csv_buffer.getvalue()

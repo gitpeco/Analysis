@@ -3,7 +3,7 @@ from django.urls import path, include
 from main import views  # 导入主应用的视图
 from django.urls import path
 from . import views
-
+from urllib.parse import quote
 app_name = 'main'
 
 urlpatterns = [

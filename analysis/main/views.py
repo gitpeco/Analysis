@@ -17,7 +17,7 @@ from django.contrib.auth.models import User
 from .crawler import run_crawler
 
 @login_required
-def search(request):
+def search(request,query):
     results = []
     if request.method == 'POST':
         search_query = request.POST.get('search_query', '')
