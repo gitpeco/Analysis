@@ -1,17 +1,12 @@
-from io import StringIO
+# crawler.py
 import json
 import time
+from io import StringIO
 from pprint import pprint
 from DrissionPage import ChromiumOptions
 from DrissionPage._pages.chromium_page import ChromiumPage
 import csv
 from urllib.parse import quote
-from io import StringIO
-import json
-import time
-from pprint import pprint
-from urllib.parse import quote
-from DrissionPage import ChromiumOptions, ChromiumPage
 
 def run_crawler(query):
     # 创建文件对象
@@ -93,6 +88,7 @@ def run_crawler(query):
         # 点击下一页
         time.sleep(2)
         dp.ele('css:.ui-icon-arrow-right').click()
-
+        jobList = csv_buffer.getvalue()
+    csv_buffer.close()
     dp.close()
-    return csv_buffer.getvalue()
+    return jobList

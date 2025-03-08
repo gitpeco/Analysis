@@ -15,15 +15,64 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.models import User
 from .crawler import run_crawler
-
+from io import StringIO
+import csv
 @login_required
-def search(request,query):
+def search(request):
     results = []
+    city_counts = {}  # 用于存储每个城市的招聘数量
+    education_counts = {}  # 用于存储每个学历层次的招聘数量
+    salary_counts = {}  # 用于存储每个薪资区间的招聘数量
+
     if request.method == 'POST':
         search_query = request.POST.get('search_query', '')
         if search_query:
-            results = run_crawler(search_query)
-    return render(request, 'main/search.html', {'results': results})
+            csv_data = run_crawler(search_query)
+
+            # 解析CSV数据
+            csv_buffer = StringIO(csv_data)
+            reader = csv.DictReader(csv_buffer)
+            results = list(reader)
+
+            # 统计每个城市的招聘数量
+            for result in results:
+                city = result.get('城市', '未知城市')
+                city_counts[city] = city_counts.get(city, 0) + 1
+
+                # 统计每个学历层次的招聘数量
+                education = result.get('学历', '未知学历')
+                if not education or education == '无要求':
+                    education = '没有需求'
+                education_counts[education] = education_counts.get(education, 0) + 1
+
+                # 统计每个薪资区间的招聘数量
+                salary = result.get('薪资', '未知薪资')
+                salary_counts[salary] = salary_counts.get(salary, 0) + 1
+
+            # 关闭缓冲区
+            csv_buffer.close()
+
+    # 将城市数据和数量转换为适合Chart.js的格式
+    chart_labels = list(city_counts.keys())
+    chart_data = list(city_counts.values())
+
+    # 将学历数据和数量转换为适合Chart.js的格式
+    education_labels = list(education_counts.keys())
+    education_data = list(education_counts.values())
+
+    # 将薪资数据和数量转换为适合Chart.js的格式
+    salary_labels = list(salary_counts.keys())
+    salary_data = list(salary_counts.values())
+
+    return render(request, 'main/search.html', {
+        'results': results,
+        'chart_labels': chart_labels,
+        'chart_data': chart_data,
+        'education_labels': education_labels,
+        'education_data': education_data,
+        'salary_labels': salary_labels,
+        'salary_data': salary_data
+    })
 
 def login(request):
     if request.method == 'POST':

@@ -5,86 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>招聘数据爬虫网站</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        form {
-            margin: 20px 0;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .form-group input:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        .form-group button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .form-group button:hover {
-            background-color: #0056b3;
-        }
-        .results {
-            margin-top: 20px;
-        }
-        .results table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .results th, .results td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        .results th {
-            background-color: #f2f2f2;
-        }
-        .logout-button {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .logout-button a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .logout-button a:hover {
-            text-decoration: underline;
-        }
+        /* 现有的样式保持不变 */
     </style>
+    <!-- 引入Chart.js库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="container">
@@ -101,6 +25,17 @@
         </form>
         <div class="results">
             <h2>结果</h2>
+            <div class="chart-container" style="position: relative; height: 400px;">
+                <canvas id="jobChart"></canvas>
+            </div>
+            <!-- 饼状图（学历分布） -->
+            <div class="chart-container" style="position: relative; height: 400px;">
+                <canvas id="educationPieChart"></canvas>
+            </div>
+            <!-- 条状图（薪资分布） -->
+            <div class="chart-container" style="position: relative; height: 400px;">
+                <canvas id="salaryBarChart"></canvas>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -122,19 +57,19 @@
                 <tbody>
                     {% for result in results %}
                     <tr>
-                        <td>{{ result.jobName }}</td>
-                        <td>{{ result.cityName }}</td>
-                        <td>{{ result.areaDistrict }}</td>
-                        <td>{{ result.businessDistrict }}</td>
-                        <td>{{ result.brandName }}</td>
-                        <td>{{ result.salaryDesc }}</td>
-                        <td>{{ result.jobExperience }}</td>
-                        <td>{{ result.jobDegree }}</td>
-                        <td>{{ result.brandIndustry }}</td>
-                        <td>{{ result.brandStageName }}</td>
-                        <td>{{ result.brandScaleName }}</td>
-                        <td>{{ result.skills }}</td>
-                        <td>{{ result.welfareList }}</td>
+                        <td>{{ result.职位 }}</td>
+                        <td>{{ result.城市 }}</td>
+                        <td>{{ result.区域 }}</td>
+                        <td>{{ result.街道 }}</td>
+                        <td>{{ result.公司 }}</td>
+                        <td>{{ result.薪资 }}</td>
+                        <td>{{ result.经验 }}</td>
+                        <td>{{ result.学历 }}</td>
+                        <td>{{ result.领域 }}</td>
+                        <td>{{ result.融资 }}</td>
+                        <td>{{ result.规模 }}</td>
+                        <td>{{ result.技能要求 }}</td>
+                        <td>{{ result.基本福利 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -144,5 +79,113 @@
             <p><a href="/logout/">返回登录页</a></p>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取柱状图容器
+            const ctx = document.getElementById('jobChart').getContext('2d');
+            // 获取饼状图容器
+            const educationPieCtx = document.getElementById('educationPieChart').getContext('2d');
+            // 获取薪资条状图容器
+            const salaryBarCtx = document.getElementById('salaryBarChart').getContext('2d');
+
+            // 从后端获取的数据
+            const chart_labels = {{ chart_labels|safe }};
+            const chart_data = {{ chart_data|safe }};
+            const education_labels = {{ education_labels|safe }};
+            const education_data = {{ education_data|safe }};
+            const salary_labels = {{ salary_labels|safe }};
+            const salary_data = {{ salary_data|safe }};
+
+            // 创建柱状图（城市分布）
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chart_labels,
+                    datasets: [{
+                        label: '招聘数量',
+                        data: chart_data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 创建饼状图（学历分布）
+            new Chart(educationPieCtx, {
+                type: 'pie',
+                data: {
+                    labels: education_labels,
+                    datasets: [{
+                        label: '学历需求数量',
+                        data: education_data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',
+                            'rgba(54, 162, 235, 0.2)',
+                            'rgba(255, 206, 86, 0.2)',
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(153, 102, 255, 0.2)',
+                            'rgba(255, 159, 64, 0.2)',
+                            'rgba(255, 99, 132, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        title: {
+                            display: true,
+                            text: '学历分布'
+                        }
+                    }
+                }
+            });
+
+            // 创建条状图（薪资分布）
+            new Chart(salaryBarCtx, {
+                type: 'bar',
+                data: {
+                    labels: salary_labels,
+                    datasets: [{
+                        label: '招聘数量',
+                        data: salary_data,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
