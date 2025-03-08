@@ -23,6 +23,7 @@ def search(request):
     city_counts = {}  # 用于存储每个城市的招聘数量
     education_counts = {}  # 用于存储每个学历层次的招聘数量
     salary_counts = {}  # 用于存储每个薪资区间的招聘数量
+    field_counts = {}  # 用于存储每个领域的招聘数量
 
     if request.method == 'POST':
         search_query = request.POST.get('search_query', '')
@@ -49,6 +50,10 @@ def search(request):
                 salary = result.get('薪资', '未知薪资')
                 salary_counts[salary] = salary_counts.get(salary, 0) + 1
 
+                # 统计每个领域的招聘数量
+                field = result.get('领域', '未知领域')
+                field_counts[field] = field_counts.get(field, 0) + 1
+
             # 关闭缓冲区
             csv_buffer.close()
 
@@ -64,6 +69,10 @@ def search(request):
     salary_labels = list(salary_counts.keys())
     salary_data = list(salary_counts.values())
 
+    # 将领域数据和数量转换为适合Chart.js的格式
+    field_labels = list(field_counts.keys())
+    field_data = list(field_counts.values())
+
     return render(request, 'main/search.html', {
         'results': results,
         'chart_labels': chart_labels,
@@ -71,7 +80,9 @@ def search(request):
         'education_labels': education_labels,
         'education_data': education_data,
         'salary_labels': salary_labels,
-        'salary_data': salary_data
+        'salary_data': salary_data,
+        'field_labels': field_labels,
+        'field_data': field_data
     })
 
 def login(request):

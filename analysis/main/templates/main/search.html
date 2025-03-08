@@ -5,7 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>招聘数据爬虫网站</title>
     <style>
-        /* 现有的样式保持不变 */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        .form-group button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+        .chart-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .logout-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .logout-button a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .logout-button a:hover {
+            text-decoration: underline;
+        }
     </style>
     <!-- 引入Chart.js库 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -35,6 +118,10 @@
             <!-- 条状图（薪资分布） -->
             <div class="chart-container" style="position: relative; height: 400px;">
                 <canvas id="salaryBarChart"></canvas>
+            </div>
+            <!-- 雷达图（领域分布） -->
+            <div class="chart-container" style="position: relative; height: 400px;">
+                <canvas id="fieldRadarChart"></canvas>
             </div>
             <table>
                 <thead>
@@ -88,6 +175,8 @@
             const educationPieCtx = document.getElementById('educationPieChart').getContext('2d');
             // 获取薪资条状图容器
             const salaryBarCtx = document.getElementById('salaryBarChart').getContext('2d');
+            // 获取领域雷达图容器
+            const fieldRadarCtx = document.getElementById('fieldRadarChart').getContext('2d');
 
             // 从后端获取的数据
             const chart_labels = {{ chart_labels|safe }};
@@ -96,6 +185,8 @@
             const education_data = {{ education_data|safe }};
             const salary_labels = {{ salary_labels|safe }};
             const salary_data = {{ salary_data|safe }};
+            const field_labels = {{ field_labels|safe }};
+            const field_data = {{ field_data|safe }};
 
             // 创建柱状图（城市分布）
             new Chart(ctx, {
@@ -181,6 +272,37 @@
                     scales: {
                         y: {
                             beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // 创建雷达图（领域分布）
+            new Chart(fieldRadarCtx, {
+                type: 'radar',
+                data: {
+                    labels: field_labels,
+                    datasets: [{
+                        label: '招聘数量',
+                        data: field_data,
+                        fill: true,
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgb(255, 99, 132)',
+                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(255, 99, 132)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: Math.max(...field_data) + 10
                         }
                     }
                 }
